@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  auth-service:
+    image: ghcr.io/sergey-gerasimo/auth-grpc-service:latest
+    ports:
+      - "50051:50051"
+    environment:
+      - JWT_SECRET_KEY=dev-secret-key-change-in-production
+      - LOG_LEVEL=DEBUG
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=auth_db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=redis_password
+      - GRPC_HOST=0.0.0.0
+      - GRPC_PORT=50051
+    volumes:
+      - ./logs:/app/logs
+      - ./proto:/app/proto # для горячей перегенерации proto
+    restart: unless-stopped
+    depends_on:
+      - db
+      - redis
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import grpc; channel = grpc.insecure_channel('localhost:50051'); print('gRPC server is running')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Если используете PostgreSQL вместо SQLite
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=auth_db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U user -d auth_db" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass redis_password
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    environment:
+      - REDIS_PASSWORD=redis_password
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+  redis_data:
