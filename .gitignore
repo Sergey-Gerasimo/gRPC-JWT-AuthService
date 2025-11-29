@@ -1,0 +1,4 @@
+.venv
+.DS_Store
+logs
+poetry.lock

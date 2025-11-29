@@ -1,0 +1,31 @@
+[project]
+name = "autintification-grpc-jwt"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Sergey",email = "gerasimovsergey2004@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "grpcio (>=1.76.0,<2.0.0)",
+    "grpcio-tools (>=1.76.0,<2.0.0)",
+    "pydantic-settings (>=2.12.0,<3.0.0)",
+    "loguru (>=0.7.3,<0.8.0)",
+    "sqlalchemy (>=2.0.44,<3.0.0)",
+    "pydantic (>=2.12.5,<3.0.0)",
+    "jose (>=1.0.0,<2.0.0)",
+    "python-jose[cryptography] (>=3.5.0,<4.0.0)",
+    "redis (>=7.1.0,<8.0.0)",
+    "dependency-injector (>=4.48.2,<5.0.0)",
+    "asyncpg (>=0.31.0,<0.32.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = ">=3.12,<4.0"
+
