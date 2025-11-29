@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package auth.grpc;
+
+enum UserRole {
+  USER = 0;
+  ADMIN = 1;
+  MODERATOR = 2;
+}
+
+enum TokenType {
+  BEARER = 0;
+  REFRESH = 1;
+}
+
+message User {
+  string username = 1;
+  UserRole role = 2;
+  string id = 3;
+  bool is_active = 4;
+  string created_at = 5;
+  string updated_at = 6;
+}
+
+message Token {
+    string token = 1;
+    TokenType token_type = 2;
+    int64 expires_in = 3;
+}
+
+message ErrorResponse {
+  string error_code = 1;
+  string error_message = 2;
+  string timestamp = 3;
+}
+
+message AuthRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message AuthResponse {
+  bool success = 1;
+  string message = 2;
+  string timestamp = 3;
+  Token access_token = 4;
+  Token refresh_token = 5;
+  User user = 6;
+}
+
+message SuccessResponse{
+    bool success = 1; 
+    string message = 2; 
+    string timestamp = 3;
+}
+
+message ChangePasswordRequest {
+    string current_password = 1; 
+    string new_password = 2;
+    Token token = 3;
+}
+
+
+service AuthService {
+    rpc authentication(AuthRequest) returns (AuthResponse);
+    rpc registrate(AuthRequest) returns (AuthResponse);
+    rpc logout(Token) returns (SuccessResponse);
+    rpc refresh_token(Token) returns (AuthResponse);
+    rpc get_user(Token) returns (User); 
+    rpc verify(Token) returns (SuccessResponse); 
+    rpc change_password(ChangePasswordRequest) returns (SuccessResponse);
+}
