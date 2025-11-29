@@ -1,6 +1,5 @@
 from datetime import datetime, timezone
 from typing import Optional
-from jose import jwt
 from pydantic import BaseModel
 
 from domain.enums import TokenType
