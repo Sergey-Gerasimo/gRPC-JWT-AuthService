@@ -25,22 +25,37 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install poetry
+        pip install poetry grpcio-tools
         poetry install
 
     - name: Generate gRPC code
       run: |
         python -m grpc_tools.protoc \
           -I./proto \
-          --python_out=. \
-          --grpc_python_out=. \
-          proto/auth.proto
+          --python_out=./grpc_generated \
+          --grpc_python_out=./grpc_generated \
+          ./proto/auth.proto
+        
+        # Проверяем, что файлы создались
+        ls -la grpc_generated/
 
-    - name: Run tests (optional)
+    - name: Fix gRPC imports (if needed)
       run: |
-        # Если есть тесты, добавь команду
-        # python -m pytest
-        echo "Tests would run here"
+        # Исправляем импорты в сгенерированных файлах
+        sed -i 's/import auth_pb2/from . import auth_pb2/' grpc_generated/auth_pb2_grpc.py || true
+
+    - name: Run tests
+      run: |
+        # Если есть тесты, можно добавить:
+        # poetry run pytest -v
+        echo "Skipping tests - add your test command here"
+
+    - name: Lint code
+      run: |
+        # Если используете линтеры:
+        # poetry run black --check .
+        # poetry run isort --check-only .
+        echo "Skipping linting - add linters if needed"
 
     - name: Lowercase repository owner
       id: lowercase
@@ -48,6 +63,7 @@ jobs:
         echo "owner_lowercase=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
     - name: Log in to GitHub Container Registry
+      if: github.event_name != 'pull_request'
       uses: docker/login-action@v3
       with:
         registry: ghcr.io
@@ -63,8 +79,8 @@ jobs:
           type=ref,event=branch
           type=ref,event=pr
           type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
           type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
@@ -73,5 +89,25 @@ jobs:
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          PYTHON_VERSION=3.12
+
+    - name: Docker Hub Login (optional)
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@v3
+      with:
+        registry: docker.io
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push to Docker Hub (optional)
+      if: github.event_name != 'pull_request'
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: your-dockerhub-username/auth-grpc-service:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
