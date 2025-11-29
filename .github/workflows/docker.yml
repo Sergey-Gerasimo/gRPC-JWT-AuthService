@@ -17,10 +17,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        driver: docker-container
+        buildkitd-flags: --debug
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'  # Понижаем версию для совместимости
+        python-version: '3.11'
 
     - name: Install system dependencies
       run: |
@@ -31,7 +37,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install poetry grpcio-tools
-        poetry install --no-root
+        poetry install --no-root --no-interaction
 
     - name: Generate gRPC code
       run: |
@@ -42,13 +48,18 @@ jobs:
           --grpc_python_out=./grpc_generated \
           ./proto/auth.proto
         
-        # Проверяем, что файлы создались
+        echo "Generated gRPC files:"
         ls -la grpc_generated/
 
     - name: Fix gRPC imports
       run: |
-        # Исправляем импорты в сгенерированных файлах
         sed -i 's/import auth_pb2/from . import auth_pb2/' grpc_generated/auth_pb2_grpc.py || true
+        echo "✅ gRPC imports fixed"
+
+    - name: Verify gRPC code generation
+      run: |
+        [ -s "grpc_generated/auth_pb2.py" ] && echo "✅ auth_pb2.py generated successfully" || echo "❌ auth_pb2.py is empty"
+        [ -s "grpc_generated/auth_pb2_grpc.py" ] && echo "✅ auth_pb2_grpc.py generated successfully" || echo "❌ auth_pb2_grpc.py is empty"
 
     - name: Run tests
       run: |
@@ -91,4 +102,5 @@ jobs:
     - name: Verify Docker image
       if: always()
       run: |
-        echo "Build completed"
+        echo "✅ Build process completed"
+        echo "Image tags: ${{ steps.meta.outputs.tags }}"
