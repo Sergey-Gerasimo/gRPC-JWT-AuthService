@@ -3,3 +3,5 @@
 logs
 poetry.lock
 TODO.md
+__pycache__
+.pytest_cache
