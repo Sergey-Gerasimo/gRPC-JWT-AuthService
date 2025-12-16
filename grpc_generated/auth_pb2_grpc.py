@@ -372,17 +372,17 @@ class UserServiceStub(object):
         self.get_user = channel.unary_unary(
                 '/grpc.UserService/get_user',
                 request_serializer=auth__pb2.UserId.SerializeToString,
-                response_deserializer=auth__pb2.User.FromString,
+                response_deserializer=auth__pb2.GetUserResponse.FromString,
                 _registered_method=True)
         self.get_user_by_username = channel.unary_unary(
                 '/grpc.UserService/get_user_by_username',
                 request_serializer=auth__pb2.UsernameRequest.SerializeToString,
-                response_deserializer=auth__pb2.User.FromString,
+                response_deserializer=auth__pb2.GetUserResponse.FromString,
                 _registered_method=True)
         self.update_user = channel.unary_unary(
                 '/grpc.UserService/update_user',
                 request_serializer=auth__pb2.UpdateUserRequest.SerializeToString,
-                response_deserializer=auth__pb2.UserResponse.FromString,
+                response_deserializer=auth__pb2.GetUserResponse.FromString,
                 _registered_method=True)
         self.delete_user = channel.unary_unary(
                 '/grpc.UserService/delete_user',
@@ -446,17 +446,17 @@ def add_UserServiceServicer_to_server(servicer, server):
             'get_user': grpc.unary_unary_rpc_method_handler(
                     servicer.get_user,
                     request_deserializer=auth__pb2.UserId.FromString,
-                    response_serializer=auth__pb2.User.SerializeToString,
+                    response_serializer=auth__pb2.GetUserResponse.SerializeToString,
             ),
             'get_user_by_username': grpc.unary_unary_rpc_method_handler(
                     servicer.get_user_by_username,
                     request_deserializer=auth__pb2.UsernameRequest.FromString,
-                    response_serializer=auth__pb2.User.SerializeToString,
+                    response_serializer=auth__pb2.GetUserResponse.SerializeToString,
             ),
             'update_user': grpc.unary_unary_rpc_method_handler(
                     servicer.update_user,
                     request_deserializer=auth__pb2.UpdateUserRequest.FromString,
-                    response_serializer=auth__pb2.UserResponse.SerializeToString,
+                    response_serializer=auth__pb2.GetUserResponse.SerializeToString,
             ),
             'delete_user': grpc.unary_unary_rpc_method_handler(
                     servicer.delete_user,
@@ -522,7 +522,7 @@ class UserService(object):
             target,
             '/grpc.UserService/get_user',
             auth__pb2.UserId.SerializeToString,
-            auth__pb2.User.FromString,
+            auth__pb2.GetUserResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -549,7 +549,7 @@ class UserService(object):
             target,
             '/grpc.UserService/get_user_by_username',
             auth__pb2.UsernameRequest.SerializeToString,
-            auth__pb2.User.FromString,
+            auth__pb2.GetUserResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -576,7 +576,7 @@ class UserService(object):
             target,
             '/grpc.UserService/update_user',
             auth__pb2.UpdateUserRequest.SerializeToString,
-            auth__pb2.UserResponse.FromString,
+            auth__pb2.GetUserResponse.FromString,
             options,
             channel_credentials,
             insecure,

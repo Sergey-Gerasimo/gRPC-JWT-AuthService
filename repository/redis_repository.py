@@ -137,7 +137,7 @@ class RedisRepository:
             logger.error(f"Redis operation error: {e}")
             raise
         finally:
-            await client.close()
+            await client.aclose()
 
     async def ping(self) -> bool:
         return await self._execute_operation(lambda client: client.ping())
