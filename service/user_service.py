@@ -28,7 +28,7 @@ class UserService(auth_pb2_grpc.UserServiceServicer, ErrorResponseMixin):
     def _to_proto_user(self, user: User) -> auth_pb2.User:
         return auth_pb2.User(
             username=user.username,
-            role=auth_pb2.UserRole.Value(user.role.value),
+            role=user.role.value,  # Return string value ('USER', 'ADMIN', 'MODERATOR') instead of enum
             id=user.user_id or "",
             is_active=user.is_active,
             created_at=user.created_at.isoformat() if user.created_at else "",
@@ -78,14 +78,20 @@ class UserService(auth_pb2_grpc.UserServiceServicer, ErrorResponseMixin):
         user = await self.user_repository.get_by_id(request.id)
         if not user:
             raise NotFoundError("User not found")
-        return self._to_proto_user(user)
+        return auth_pb2.GetUserResponse(
+            success=True,
+            user=self._to_proto_user(user),
+        )
 
     @grpc_error_handler(logger=getLogger("UserService"))
     async def get_user_by_username(self, request, context):
         user = await self.user_repository.get_by_username(request.username)
         if not user:
             raise NotFoundError("User not found")
-        return self._to_proto_user(user)
+        return auth_pb2.GetUserResponse(
+            success=True,
+            user=self._to_proto_user(user),
+        )
 
     @grpc_error_handler(logger=getLogger("UserService"))
     async def update_user(self, request, context):
@@ -116,10 +122,8 @@ class UserService(auth_pb2_grpc.UserServiceServicer, ErrorResponseMixin):
 
         updated = await self.user_repository.update(current)
 
-        return auth_pb2.UserResponse(
+        return auth_pb2.GetUserResponse(
             success=True,
-            message="User updated",
-            timestamp=datetime.now().isoformat(),
             user=self._to_proto_user(updated),
         )
 

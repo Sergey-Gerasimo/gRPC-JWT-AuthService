@@ -1,9 +1,10 @@
 from datetime import datetime
 from re import I
+from domain.entities import Token
 import grpc
 from logging import Logger, getLogger
 
-from config import settings
+from config import logger, settings
 from decorators import grpc_error_handler
 from decorators.error_handler import ErrorResponseMixin
 from domain.entities import User
@@ -124,7 +125,7 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
             ),
             user=auth_pb2.User(
                 username=user.username,
-                role=auth_pb2.UserRole.Value(user.role.value),
+                role=user.role.value,  # Return string value ('USER', 'ADMIN', 'MODERATOR')
                 id=user.user_id,
                 is_active=user.is_active,
                 created_at=user.created_at.isoformat(),
@@ -198,7 +199,7 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
             ),
             user=auth_pb2.User(
                 username=saved_user.username,
-                role=auth_pb2.UserRole.Value(saved_user.role.value),
+                role=saved_user.role.value,  # Return string value ('USER', 'ADMIN', 'MODERATOR')
                 id=saved_user.user_id,
                 is_active=saved_user.is_active,
                 created_at=saved_user.created_at.isoformat(),
@@ -212,22 +213,15 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
     async def logout(self, request, context):
         self.logger.info("Logout request")
         payload = self.jwt_service.verify_token(request)
+        logger.debug(f"try to verify token, request: {request}")
         if not payload:
+            logger.debug(f"token not verified, invalid payload ")
             raise InvalidTokenError("Invalid token")
 
-        username = payload.get("sub")
-        if not username:
-            raise InvalidTokenError("Invalid token payload")
-
-        await self.cache_repository.delete(f"refresh_token:{username}")
-
-        await self.cache_repository.set(
-            f"blacklist:{request.token}",
-            "1",
-            expire=settings.security.access_token_expire_minutes * 60,
-        )
-
-        self.logger.info(f"User logged out: {username}")
+        logger.debug(f"token verified")
+        logger.debug(f"payload: {payload}")
+        logger.debug(f"request: {request}")
+        logger.debug(f"try to verify token")
 
         return auth_pb2.SuccessResponse(
             success=True,
@@ -255,9 +249,20 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
             f"refresh_token:{username}"
         )
 
+        if cached_refresh_token is None:
+            raise InvalidTokenError("Refresh token not found or expired")
         self.logger.debug(f"cahced_refresh_token: {cached_refresh_token}")
 
-        if cached_refresh_token.token != request.token:
+        if (
+            isinstance(cached_refresh_token, Token)
+            and cached_refresh_token.token != request.token
+        ):
+            raise InvalidTokenError("Refresh token not found or expired")
+
+        elif (
+            isinstance(cached_refresh_token, str)
+            and cached_refresh_token != request.token
+        ):
             raise InvalidTokenError("Refresh token not found or expired")
 
         new_access_token = self.jwt_service.create_access_token(username)
@@ -304,7 +309,7 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
         if cached_user:
             return auth_pb2.User(
                 username=username,
-                role=auth_pb2.UserRole.Value(cached_user.get("role", "USER")),
+                role=cached_user.get("role", "USER"),  # Return string value directly
                 id=cached_user.get("user_id", ""),
                 is_active=cached_user.get("is_active", "True") == "True",
                 created_at=cached_user.get("created_at", ""),  # Из кэша нет created_at
@@ -317,7 +322,7 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
 
         return auth_pb2.User(
             username=user.username,
-            role=auth_pb2.UserRole.Value(user.role.value),
+            role=user.role.value,  # Return string value ('USER', 'ADMIN', 'MODERATOR')
             id=user.user_id,
             is_active=user.is_active,
             created_at=user.created_at.isoformat(),
