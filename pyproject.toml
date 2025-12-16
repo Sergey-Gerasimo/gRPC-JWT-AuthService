@@ -20,6 +20,14 @@ dependencies = [
     "pyjwt (>=2.10.1,<3.0.0)"
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest (>=9.0.1,<10.0.0)",
+    "pytest-asyncio (>=1.3.0,<2.0.0)",
+    "testcontainers[postgres,redis] (>=4.11.0,<5.0.0)",
+    "greenlet (>=3.1.1,<4.0.0)"
+]
+
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -27,4 +35,31 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = ">=3.12,<4.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=9.0.1,<10.0.0"
+pytest-asyncio = ">=1.3.0,<2.0.0"
+testcontainers = {extras = ["postgres", "redis"], version = ">=4.11.0,<5.0.0"}
+greenlet = ">=3.1.1,<4.0.0"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+pythonpath = ["."]
+
+# Настройки логирования - отключаем вывод в терминал во время выполнения
+log_cli_level = "DEBUG"
+log_level = "DEBUG"
+
+# Выводить логи только при ошибках
+addopts = "-v --tb=short --show-capture=log"
+filterwarnings = [
+    "ignore::DeprecationWarning:testcontainers.core.waiting_utils",
+    "ignore:Flushing object.*incompatible polymorphic identity.*logist.*:sqlalchemy.exc.SAWarning",
+]
 
