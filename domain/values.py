@@ -1,6 +1,6 @@
 import hashlib
 import re
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 from typing import TypeVar, Any, Generic
 from abc import ABC, abstractmethod
 
@@ -8,13 +8,19 @@ VT = TypeVar("VT", bound=Any)
 
 
 class BaseValueObject(BaseModel, ABC, Generic[VT]):
+    model_config = ConfigDict(
+        frozen=True,
+        arbitrary_types_allowed=True,
+    )
+
     value: VT
 
     @field_validator("value")
+    @classmethod
     @abstractmethod
     def validate_value(cls, v: VT) -> VT:
         """Валидация значения value object"""
-        pass
+        raise NotImplementedError("Subclasses must implement validate_value")
 
     @abstractmethod
     def as_generic_type(self) -> Any:
@@ -32,15 +38,12 @@ class BaseValueObject(BaseModel, ABC, Generic[VT]):
     def __hash__(self) -> int:
         return hash(self.value)
 
-    class Config:
-        frozen = True
-        arbitrary_types_allowed = True
-
 
 class HashedPasswordSHA256(BaseValueObject[str]):
     value: str
 
     @field_validator("value")
+    @classmethod
     def validate_value(cls, v: str) -> str:
         if not isinstance(v, str):
             raise ValueError("Hashed password must be a string")
