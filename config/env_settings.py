@@ -1,24 +1,20 @@
 from typing import Optional
+from loguru import logger
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class SuperUserSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="")
-
     username: str = Field(default="superuser", alias="SUPERUSER_USERNAME")
     password: str = Field(default="superuser", alias="SUPERUSER_PASSWORD")
 
 
 class GRPCSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="")
     host: str = Field(default="0.0.0.0", alias="GRPC_HOST")
     port: str = Field(default="50051", alias="GRPC_PORT")
 
 
 class SecuritySettings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="")
-
     secret_key: str = Field(
         default="your-secret-key-change-this-in-production", alias="SECRET_KEY"
     )
@@ -32,8 +28,6 @@ class SecuritySettings(BaseSettings):
 
 
 class LogSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="", case_sensitive=False)
-
     debug: bool = Field(default=True, alias="DEBUG")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
     log_format: str = Field(default="json", alias="LOG_FORMAT")
@@ -41,8 +35,6 @@ class LogSettings(BaseSettings):
 
 
 class RedisSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="REDIS_")
-
     host: str = Field(default="localhost", alias="REDIS_HOST")
     port: int = Field(default=6379, alias="REDIS_PORT")
     db: int = Field(default=0, alias="REDIS_DB")
@@ -70,15 +62,15 @@ class RedisSettings(BaseSettings):
 
 
 class DatabaseSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="")
+    model_config = SettingsConfigDict(case_sensitive=False)
     db: str = Field(default="postgres", alias="POSTGRES_DB")
     user: str = Field(default="postgres", alias="POSTGRES_USER")
     password: str = Field(default="password", alias="POSTGRES_PASSWORD")
     host: str = Field(default="localhost", alias="POSTGRES_HOST")
     port: int = Field(default=5432, alias="POSTGRES_PORT")
-    pool_size: int = Field(default=10, alias="POSTGRES_POOL_SIZE")
-    max_overflow: int = Field(default=20, alias="POSTGRES_MAX_OVERFLOW")
-    echo: bool = Field(default=False, alias="POSTGRES_ECHO")
+    pool_size: int = Field(default=10)
+    max_overflow: int = Field(default=20)
+    echo: bool = Field(default=False)
 
     @property
     def url_asyncpg(self) -> str:
