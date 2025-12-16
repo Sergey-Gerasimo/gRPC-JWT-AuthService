@@ -43,7 +43,7 @@ if __name__ == "__main__":
             await serve(
                 auth_service=auth_service,
                 user_service=user_service,
-                auth_interceptor=auth_interceptor,
+                auth_interceptors=[auth_interceptor],
             )
         finally:
             await session.close()
