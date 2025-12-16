@@ -154,7 +154,8 @@ class UserRepository:
         offset: int = 0,
         is_active: Optional[bool] = None,
         role: Optional[UserRole] = None,
-    ) -> List[User]:
+        username: Optional[str] = None,
+    ) -> tuple[List[User], int]:
         base_query = select(UserModel)
 
         # Применяем фильтры
@@ -165,6 +166,9 @@ class UserRepository:
 
         if role is not None:
             conditions.append(UserModel.role == role)
+
+        if username:
+            conditions.append(UserModel.username.ilike(f"%{username}%"))
 
         if conditions:
             base_query = base_query.where(and_(*conditions))

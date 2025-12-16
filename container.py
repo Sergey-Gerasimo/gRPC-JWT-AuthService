@@ -7,6 +7,7 @@ from repository.memory_adapter import MemoryRepository
 from repository.user_repository import UserRepository
 
 from service.auth_service import AuthService
+from service.user_service import UserService
 from service.jwt_service import JWTService
 
 from config import settings, logger
@@ -75,10 +76,15 @@ class ServicesContainer(containers.DeclarativeContainer):
         jwt_service=jwt_service,
     )
 
+    user_service = providers.Singleton(
+        UserService,
+        user_repository=repositories.user_repository,
+    )
+
 
 class ApplicationContainer(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(
-        modules=["service.auth_service", "main"]
+        modules=["service.auth_service", "service.user_service"]
     )
 
     logger = providers.Container(LoggerContainer)

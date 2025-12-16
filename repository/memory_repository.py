@@ -22,7 +22,11 @@ class MemoryRepository:
         return cls._instance
 
     def __init__(self):
-        self._cleanup_task = asyncio.create_task(self._cleanup_expired())
+        if getattr(self, "_cleanup_task_started", False):
+            return
+        self._cleanup_task_started = True
+        loop = asyncio.get_event_loop()
+        self._cleanup_task = loop.create_task(self._cleanup_expired())
 
     async def _cleanup_expired(self):
         """Фоновая задача для очистки просроченных записей"""

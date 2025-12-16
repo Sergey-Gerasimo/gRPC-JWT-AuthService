@@ -163,6 +163,35 @@ class RedisRepository:
             return None
         return self.serializer.deserialize(result)
 
+    async def get_int(self, key: str) -> Optional[int]:
+        """Get a raw integer value without deserialization (for counters)"""
+        result = await self._execute_operation(lambda client, k: client.get(k), key)
+        if result is None:
+            return None
+        try:
+            # Try to parse as integer (handles both raw integers and JSON-encoded integers)
+            if isinstance(result, int):
+                return result
+            if isinstance(result, str):
+                # Try JSON first, then direct int conversion
+                try:
+                    parsed = json.loads(result)
+                    if isinstance(parsed, int):
+                        return parsed
+                except (json.JSONDecodeError, ValueError):
+                    pass
+                # Direct int conversion for raw string integers
+                return int(result)
+            return int(result)
+        except (ValueError, TypeError):
+            # If deserialization fails, try the regular deserializer as fallback
+            deserialized = self.serializer.deserialize(result)
+            if isinstance(deserialized, int):
+                return deserialized
+            if isinstance(deserialized, str):
+                return int(deserialized)
+            raise ValueError(f"Cannot convert value to integer: {result}")
+
     async def delete(self, *keys: str) -> int:
         return await self._execute_operation(lambda client, k: client.delete(*k), keys)
 
@@ -207,6 +236,15 @@ class RedisRepository:
 
     async def incr(self, key: str) -> int:
         return await self._execute_operation(lambda client, k: client.incr(k), key)
+
+    async def set_int(self, key: str, value: int, expire: Optional[int] = None) -> bool:
+        """Set a raw integer value without serialization (for counters)"""
+        return await self._execute_operation(
+            lambda client, k, v, ex: client.set(k, v, ex=ex),
+            key,
+            value,
+            expire,
+        )
 
     async def lpush(self, key: str, *values: Any) -> int:
         serialized_values = [self.serializer.serialize(v) for v in values]

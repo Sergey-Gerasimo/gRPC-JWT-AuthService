@@ -2,3 +2,4 @@
 .DS_Store
 logs
 poetry.lock
+TODO.md

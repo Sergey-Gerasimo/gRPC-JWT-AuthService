@@ -3,28 +3,25 @@
 import grpc
 import warnings
 
-from grpc_generated import auth_pb2 as proto_dot_auth__pb2
+from . import auth_pb2 as auth__pb2
 
-GRPC_GENERATED_VERSION = "1.76.0"
+GRPC_GENERATED_VERSION = '1.76.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
 try:
     from grpc._utilities import first_version_is_lower
-
-    _version_not_supported = first_version_is_lower(
-        GRPC_VERSION, GRPC_GENERATED_VERSION
-    )
+    _version_not_supported = first_version_is_lower(GRPC_VERSION, GRPC_GENERATED_VERSION)
 except ImportError:
     _version_not_supported = True
 
 if _version_not_supported:
     raise RuntimeError(
-        f"The grpc package installed is at version {GRPC_VERSION},"
-        + " but the generated code in proto/auth_pb2_grpc.py depends on"
-        + f" grpcio>={GRPC_GENERATED_VERSION}."
-        + f" Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}"
-        + f" or downgrade your generated code using grpcio-tools<={GRPC_VERSION}."
+        f'The grpc package installed is at version {GRPC_VERSION},'
+        + ' but the generated code in auth_pb2_grpc.py depends on'
+        + f' grpcio>={GRPC_GENERATED_VERSION}.'
+        + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
+        + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
@@ -38,47 +35,40 @@ class AuthServiceStub(object):
             channel: A grpc.Channel.
         """
         self.authentication = channel.unary_unary(
-            "/grpc.AuthService/authentication",
-            request_serializer=proto_dot_auth__pb2.AuthRequest.SerializeToString,
-            response_deserializer=proto_dot_auth__pb2.AuthResponse.FromString,
-            _registered_method=True,
-        )
+                '/grpc.AuthService/authentication',
+                request_serializer=auth__pb2.AuthRequest.SerializeToString,
+                response_deserializer=auth__pb2.AuthResponse.FromString,
+                _registered_method=True)
         self.registrate = channel.unary_unary(
-            "/grpc.AuthService/registrate",
-            request_serializer=proto_dot_auth__pb2.AuthRequest.SerializeToString,
-            response_deserializer=proto_dot_auth__pb2.AuthResponse.FromString,
-            _registered_method=True,
-        )
+                '/grpc.AuthService/registrate',
+                request_serializer=auth__pb2.AuthRequest.SerializeToString,
+                response_deserializer=auth__pb2.AuthResponse.FromString,
+                _registered_method=True)
         self.logout = channel.unary_unary(
-            "/grpc.AuthService/logout",
-            request_serializer=proto_dot_auth__pb2.Token.SerializeToString,
-            response_deserializer=proto_dot_auth__pb2.SuccessResponse.FromString,
-            _registered_method=True,
-        )
+                '/grpc.AuthService/logout',
+                request_serializer=auth__pb2.Token.SerializeToString,
+                response_deserializer=auth__pb2.SuccessResponse.FromString,
+                _registered_method=True)
         self.refresh_token = channel.unary_unary(
-            "/grpc.AuthService/refresh_token",
-            request_serializer=proto_dot_auth__pb2.Token.SerializeToString,
-            response_deserializer=proto_dot_auth__pb2.AuthResponse.FromString,
-            _registered_method=True,
-        )
+                '/grpc.AuthService/refresh_token',
+                request_serializer=auth__pb2.Token.SerializeToString,
+                response_deserializer=auth__pb2.AuthResponse.FromString,
+                _registered_method=True)
         self.get_user = channel.unary_unary(
-            "/grpc.AuthService/get_user",
-            request_serializer=proto_dot_auth__pb2.Token.SerializeToString,
-            response_deserializer=proto_dot_auth__pb2.User.FromString,
-            _registered_method=True,
-        )
+                '/grpc.AuthService/get_user',
+                request_serializer=auth__pb2.Token.SerializeToString,
+                response_deserializer=auth__pb2.User.FromString,
+                _registered_method=True)
         self.verify = channel.unary_unary(
-            "/grpc.AuthService/verify",
-            request_serializer=proto_dot_auth__pb2.Token.SerializeToString,
-            response_deserializer=proto_dot_auth__pb2.SuccessResponse.FromString,
-            _registered_method=True,
-        )
+                '/grpc.AuthService/verify',
+                request_serializer=auth__pb2.Token.SerializeToString,
+                response_deserializer=auth__pb2.SuccessResponse.FromString,
+                _registered_method=True)
         self.change_password = channel.unary_unary(
-            "/grpc.AuthService/change_password",
-            request_serializer=proto_dot_auth__pb2.ChangePasswordRequest.SerializeToString,
-            response_deserializer=proto_dot_auth__pb2.SuccessResponse.FromString,
-            _registered_method=True,
-        )
+                '/grpc.AuthService/change_password',
+                request_serializer=auth__pb2.ChangePasswordRequest.SerializeToString,
+                response_deserializer=auth__pb2.SuccessResponse.FromString,
+                _registered_method=True)
 
 
 class AuthServiceServicer(object):
@@ -87,114 +77,111 @@ class AuthServiceServicer(object):
     def authentication(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def registrate(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def logout(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def refresh_token(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def get_user(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def verify(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def change_password(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
 
 def add_AuthServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-        "authentication": grpc.unary_unary_rpc_method_handler(
-            servicer.authentication,
-            request_deserializer=proto_dot_auth__pb2.AuthRequest.FromString,
-            response_serializer=proto_dot_auth__pb2.AuthResponse.SerializeToString,
-        ),
-        "registrate": grpc.unary_unary_rpc_method_handler(
-            servicer.registrate,
-            request_deserializer=proto_dot_auth__pb2.AuthRequest.FromString,
-            response_serializer=proto_dot_auth__pb2.AuthResponse.SerializeToString,
-        ),
-        "logout": grpc.unary_unary_rpc_method_handler(
-            servicer.logout,
-            request_deserializer=proto_dot_auth__pb2.Token.FromString,
-            response_serializer=proto_dot_auth__pb2.SuccessResponse.SerializeToString,
-        ),
-        "refresh_token": grpc.unary_unary_rpc_method_handler(
-            servicer.refresh_token,
-            request_deserializer=proto_dot_auth__pb2.Token.FromString,
-            response_serializer=proto_dot_auth__pb2.AuthResponse.SerializeToString,
-        ),
-        "get_user": grpc.unary_unary_rpc_method_handler(
-            servicer.get_user,
-            request_deserializer=proto_dot_auth__pb2.Token.FromString,
-            response_serializer=proto_dot_auth__pb2.User.SerializeToString,
-        ),
-        "verify": grpc.unary_unary_rpc_method_handler(
-            servicer.verify,
-            request_deserializer=proto_dot_auth__pb2.Token.FromString,
-            response_serializer=proto_dot_auth__pb2.SuccessResponse.SerializeToString,
-        ),
-        "change_password": grpc.unary_unary_rpc_method_handler(
-            servicer.change_password,
-            request_deserializer=proto_dot_auth__pb2.ChangePasswordRequest.FromString,
-            response_serializer=proto_dot_auth__pb2.SuccessResponse.SerializeToString,
-        ),
+            'authentication': grpc.unary_unary_rpc_method_handler(
+                    servicer.authentication,
+                    request_deserializer=auth__pb2.AuthRequest.FromString,
+                    response_serializer=auth__pb2.AuthResponse.SerializeToString,
+            ),
+            'registrate': grpc.unary_unary_rpc_method_handler(
+                    servicer.registrate,
+                    request_deserializer=auth__pb2.AuthRequest.FromString,
+                    response_serializer=auth__pb2.AuthResponse.SerializeToString,
+            ),
+            'logout': grpc.unary_unary_rpc_method_handler(
+                    servicer.logout,
+                    request_deserializer=auth__pb2.Token.FromString,
+                    response_serializer=auth__pb2.SuccessResponse.SerializeToString,
+            ),
+            'refresh_token': grpc.unary_unary_rpc_method_handler(
+                    servicer.refresh_token,
+                    request_deserializer=auth__pb2.Token.FromString,
+                    response_serializer=auth__pb2.AuthResponse.SerializeToString,
+            ),
+            'get_user': grpc.unary_unary_rpc_method_handler(
+                    servicer.get_user,
+                    request_deserializer=auth__pb2.Token.FromString,
+                    response_serializer=auth__pb2.User.SerializeToString,
+            ),
+            'verify': grpc.unary_unary_rpc_method_handler(
+                    servicer.verify,
+                    request_deserializer=auth__pb2.Token.FromString,
+                    response_serializer=auth__pb2.SuccessResponse.SerializeToString,
+            ),
+            'change_password': grpc.unary_unary_rpc_method_handler(
+                    servicer.change_password,
+                    request_deserializer=auth__pb2.ChangePasswordRequest.FromString,
+                    response_serializer=auth__pb2.SuccessResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "grpc.AuthService", rpc_method_handlers
-    )
+            'grpc.AuthService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers("grpc.AuthService", rpc_method_handlers)
+    server.add_registered_method_handlers('grpc.AuthService', rpc_method_handlers)
 
 
-# This class is part of an EXPERIMENTAL API.
+ # This class is part of an EXPERIMENTAL API.
 class AuthService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def authentication(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def authentication(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/grpc.AuthService/authentication",
-            proto_dot_auth__pb2.AuthRequest.SerializeToString,
-            proto_dot_auth__pb2.AuthResponse.FromString,
+            '/grpc.AuthService/authentication',
+            auth__pb2.AuthRequest.SerializeToString,
+            auth__pb2.AuthResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -203,28 +190,25 @@ class AuthService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def registrate(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def registrate(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/grpc.AuthService/registrate",
-            proto_dot_auth__pb2.AuthRequest.SerializeToString,
-            proto_dot_auth__pb2.AuthResponse.FromString,
+            '/grpc.AuthService/registrate',
+            auth__pb2.AuthRequest.SerializeToString,
+            auth__pb2.AuthResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -233,28 +217,25 @@ class AuthService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def logout(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def logout(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/grpc.AuthService/logout",
-            proto_dot_auth__pb2.Token.SerializeToString,
-            proto_dot_auth__pb2.SuccessResponse.FromString,
+            '/grpc.AuthService/logout',
+            auth__pb2.Token.SerializeToString,
+            auth__pb2.SuccessResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -263,28 +244,25 @@ class AuthService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def refresh_token(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def refresh_token(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/grpc.AuthService/refresh_token",
-            proto_dot_auth__pb2.Token.SerializeToString,
-            proto_dot_auth__pb2.AuthResponse.FromString,
+            '/grpc.AuthService/refresh_token',
+            auth__pb2.Token.SerializeToString,
+            auth__pb2.AuthResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -293,28 +271,25 @@ class AuthService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def get_user(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def get_user(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/grpc.AuthService/get_user",
-            proto_dot_auth__pb2.Token.SerializeToString,
-            proto_dot_auth__pb2.User.FromString,
+            '/grpc.AuthService/get_user',
+            auth__pb2.Token.SerializeToString,
+            auth__pb2.User.FromString,
             options,
             channel_credentials,
             insecure,
@@ -323,28 +298,25 @@ class AuthService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def verify(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def verify(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/grpc.AuthService/verify",
-            proto_dot_auth__pb2.Token.SerializeToString,
-            proto_dot_auth__pb2.SuccessResponse.FromString,
+            '/grpc.AuthService/verify',
+            auth__pb2.Token.SerializeToString,
+            auth__pb2.SuccessResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -353,28 +325,25 @@ class AuthService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
 
     @staticmethod
-    def change_password(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def change_password(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/grpc.AuthService/change_password",
-            proto_dot_auth__pb2.ChangePasswordRequest.SerializeToString,
-            proto_dot_auth__pb2.SuccessResponse.FromString,
+            '/grpc.AuthService/change_password',
+            auth__pb2.ChangePasswordRequest.SerializeToString,
+            auth__pb2.SuccessResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -383,5 +352,291 @@ class AuthService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)
+
+
+class UserServiceStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.create_user = channel.unary_unary(
+                '/grpc.UserService/create_user',
+                request_serializer=auth__pb2.CreateUserRequest.SerializeToString,
+                response_deserializer=auth__pb2.UserResponse.FromString,
+                _registered_method=True)
+        self.get_user = channel.unary_unary(
+                '/grpc.UserService/get_user',
+                request_serializer=auth__pb2.UserId.SerializeToString,
+                response_deserializer=auth__pb2.User.FromString,
+                _registered_method=True)
+        self.get_user_by_username = channel.unary_unary(
+                '/grpc.UserService/get_user_by_username',
+                request_serializer=auth__pb2.UsernameRequest.SerializeToString,
+                response_deserializer=auth__pb2.User.FromString,
+                _registered_method=True)
+        self.update_user = channel.unary_unary(
+                '/grpc.UserService/update_user',
+                request_serializer=auth__pb2.UpdateUserRequest.SerializeToString,
+                response_deserializer=auth__pb2.UserResponse.FromString,
+                _registered_method=True)
+        self.delete_user = channel.unary_unary(
+                '/grpc.UserService/delete_user',
+                request_serializer=auth__pb2.UserId.SerializeToString,
+                response_deserializer=auth__pb2.SuccessResponse.FromString,
+                _registered_method=True)
+        self.list_users = channel.unary_unary(
+                '/grpc.UserService/list_users',
+                request_serializer=auth__pb2.ListUsersRequest.SerializeToString,
+                response_deserializer=auth__pb2.UsersResponse.FromString,
+                _registered_method=True)
+
+
+class UserServiceServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def create_user(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def get_user(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def get_user_by_username(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def update_user(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def delete_user(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def list_users(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_UserServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'create_user': grpc.unary_unary_rpc_method_handler(
+                    servicer.create_user,
+                    request_deserializer=auth__pb2.CreateUserRequest.FromString,
+                    response_serializer=auth__pb2.UserResponse.SerializeToString,
+            ),
+            'get_user': grpc.unary_unary_rpc_method_handler(
+                    servicer.get_user,
+                    request_deserializer=auth__pb2.UserId.FromString,
+                    response_serializer=auth__pb2.User.SerializeToString,
+            ),
+            'get_user_by_username': grpc.unary_unary_rpc_method_handler(
+                    servicer.get_user_by_username,
+                    request_deserializer=auth__pb2.UsernameRequest.FromString,
+                    response_serializer=auth__pb2.User.SerializeToString,
+            ),
+            'update_user': grpc.unary_unary_rpc_method_handler(
+                    servicer.update_user,
+                    request_deserializer=auth__pb2.UpdateUserRequest.FromString,
+                    response_serializer=auth__pb2.UserResponse.SerializeToString,
+            ),
+            'delete_user': grpc.unary_unary_rpc_method_handler(
+                    servicer.delete_user,
+                    request_deserializer=auth__pb2.UserId.FromString,
+                    response_serializer=auth__pb2.SuccessResponse.SerializeToString,
+            ),
+            'list_users': grpc.unary_unary_rpc_method_handler(
+                    servicer.list_users,
+                    request_deserializer=auth__pb2.ListUsersRequest.FromString,
+                    response_serializer=auth__pb2.UsersResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'grpc.UserService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('grpc.UserService', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class UserService(object):
+    """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def create_user(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/grpc.UserService/create_user',
+            auth__pb2.CreateUserRequest.SerializeToString,
+            auth__pb2.UserResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def get_user(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/grpc.UserService/get_user',
+            auth__pb2.UserId.SerializeToString,
+            auth__pb2.User.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def get_user_by_username(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/grpc.UserService/get_user_by_username',
+            auth__pb2.UsernameRequest.SerializeToString,
+            auth__pb2.User.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def update_user(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/grpc.UserService/update_user',
+            auth__pb2.UpdateUserRequest.SerializeToString,
+            auth__pb2.UserResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def delete_user(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/grpc.UserService/delete_user',
+            auth__pb2.UserId.SerializeToString,
+            auth__pb2.SuccessResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def list_users(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/grpc.UserService/list_users',
+            auth__pb2.ListUsersRequest.SerializeToString,
+            auth__pb2.UsersResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)

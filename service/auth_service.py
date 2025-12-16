@@ -1,7 +1,7 @@
 from datetime import datetime
+from re import I
+import grpc
 from logging import Logger, getLogger
-from grpc import aio
-import asyncio
 
 from config import settings
 from decorators import grpc_error_handler
@@ -12,8 +12,17 @@ from repository.redis_repository import RedisRepository
 from repository.user_repository import UserRepository
 from .jwt_service import JWTService
 
-from domain.enums import TokenType
 from grpc_generated import auth_pb2_grpc, auth_pb2
+
+from domain.exceptions import (
+    InvalidTokenError,
+    NotFoundError,
+    InvalidArgumentError,
+    AlreadyExistsError,
+    UnauthorizedError,
+    ForbiddenError,
+    TooManyAuthenticationAttemptsError,
+)
 
 
 class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
@@ -38,36 +47,45 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
     async def _increment_auth_attempts(self, username: str):
         """Увеличивает счетчик попыток аутентификации"""
         attempts_key = f"auth_attempt:{username}"
-        current_attempts = await self.cache_repository.get(attempts_key)
-        if current_attempts:
-            await self.cache_repository.incr(attempts_key)
-        else:
-            await self.cache_repository.set(attempts_key, "1", expire=900)  # 15 минут
+        try:
+            # Try to increment - Redis INCR creates key with value 1 if it doesn't exist
+            result = await self.cache_repository.incr(attempts_key)
+            # If this was a new key (result == 1), set expiration
+            if result == 1:
+                await self.cache_repository.expire(attempts_key, 900)  # 15 минут
+        except Exception as e:
+            # Handle case where key exists but contains non-integer value (corrupted)
+            # Delete and recreate with proper integer value
+            self.logger.warning(
+                f"Failed to increment auth attempts for {username}: {e}. Resetting counter."
+            )
+            await self.cache_repository.delete(attempts_key)
+            await self.cache_repository.set_int(attempts_key, 1, expire=900)  # 15 минут
 
     @grpc_error_handler(logger=getLogger("AuthService"))
     async def authentication(self, request, context):
 
-        cached_attempts = await self.cache_repository.get(
+        cached_attempts = await self.cache_repository.get_int(
             f"auth_attempt:{request.username}"
         )
 
-        if cached_attempts and int(cached_attempts) >= 5:
-            raise ValueError("Too many authentication attempts")
+        if cached_attempts and cached_attempts >= 5:
+            raise TooManyAuthenticationAttemptsError("Too many authentication attempts")
 
         user = await self.user_repository.get_by_username(request.username)
-        self.logger.debug(f"Найден пользак: {user}")
         if not user:
-            await self._increment_auth_attempts(request.username)
-            raise ValueError("Invalid username or password")
+            raise NotFoundError("User not found")
+
+        self.logger.debug(f"Найден пользак: {user}")
 
         if not user.authenticate(
             HashedPasswordSHA256.from_plain_password(request.password)
         ):
             await self._increment_auth_attempts(request.username)
-            raise ValueError("Invalid username or password")
+            raise UnauthorizedError("Invalid username or password")
 
         if not user.is_active:
-            raise ValueError("User account is inactive")
+            raise ForbiddenError("User account is inactive")
 
         await self.cache_repository.delete(f"auth_attempt:{request.username}")
 
@@ -119,10 +137,10 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
         self.logger.info(f"Registration attempt for user: {request.username}")
 
         if len(request.username) < 3:
-            raise ValueError("Username must be at least 3 characters long")
+            raise InvalidArgumentError("Username must be at least 3 characters long")
 
         if len(request.password) < 6:
-            raise ValueError("Password must be at least 6 characters long")
+            raise InvalidArgumentError("Password must be at least 6 characters long")
 
         existing_user = await self.user_repository.exists_with_username(
             request.username
@@ -131,16 +149,16 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
         self.logger.debug("Поиск произошел")
 
         if existing_user:
-            raise ValueError("Username already exists")
+            raise AlreadyExistsError("User with this username already exists")
 
         username = request.username
         password_hash = HashedPasswordSHA256.from_plain_password(request.password)
         user = User.create(username, password_hash)
 
-        self.logger.debug("Юзер создан")
+        self.logger.debug("Пользак создан")
 
         saved_user = await self.user_repository.save(user)
-        self.logger.debug("Юзер сохранен")
+        self.logger.debug("Польказ сохранен")
 
         access_token = self.jwt_service.create_access_token(saved_user.username)
         refresh_token = self.jwt_service.create_refresh_token(saved_user.username)
@@ -195,11 +213,11 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
         self.logger.info("Logout request")
         payload = self.jwt_service.verify_token(request)
         if not payload:
-            raise ValueError("Invalid token")
+            raise InvalidTokenError("Invalid token")
 
         username = payload.get("sub")
         if not username:
-            raise ValueError("Invalid token payload")
+            raise InvalidTokenError("Invalid token payload")
 
         await self.cache_repository.delete(f"refresh_token:{username}")
 
@@ -217,23 +235,19 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
             timestamp=datetime.now().isoformat(),
         )
 
-    @grpc_error_handler(logger=getLogger("AuthService"))
     async def refresh_token(self, request, context):
         self.logger.info("Refresh token request")
 
-        if request.token_type != auth_pb2.TokenType.REFRESH:
-            raise ValueError("Not a refresh token")
-
         payload = self.jwt_service.verify_token(request)
         if not payload:
-            raise ValueError("Invalid refresh token")
+            raise InvalidTokenError("Invalid token payload")
 
         username = payload.get("sub")
         if not username:
-            raise ValueError("Invalid token payload")
+            raise InvalidTokenError("Invalid token payload")
 
         if payload.get("type") != "refresh":
-            raise ValueError("Not a refresh token")
+            raise InvalidTokenError("Not a refresh token")
 
         self.logger.debug(f"key: refresh_token:{username}")
 
@@ -244,7 +258,7 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
         self.logger.debug(f"cahced_refresh_token: {cached_refresh_token}")
 
         if cached_refresh_token.token != request.token:
-            raise ValueError("Refresh token not found or expired")
+            raise InvalidTokenError("Refresh token not found or expired")
 
         new_access_token = self.jwt_service.create_access_token(username)
         new_refresh_token = self.jwt_service.create_refresh_token(username)
@@ -279,11 +293,11 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
 
         payload = self.jwt_service.verify_token(request)
         if not payload:
-            raise ValueError("Invalid token")
+            raise InvalidTokenError("Invalid token payload")
 
         username = payload.get("sub")
         if not username:
-            raise ValueError("Invalid token")
+            raise InvalidTokenError("Invalid token payload")
 
         cached_user = await self.cache_repository.hgetall(f"user:{username}")
 
@@ -299,7 +313,7 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
 
         user = await self.user_repository.get_by_username(username)
         if not user:
-            return auth_pb2.User()
+            raise NotFoundError("User not found")
 
         return auth_pb2.User(
             username=user.username,
@@ -318,19 +332,19 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
             f"blacklist:{request.token}"
         )
         if is_blacklisted:
-            raise ValueError("Token is blacklisted")
+            raise InvalidTokenError("Token is blacklisted")
 
         payload = self.jwt_service.verify_token(request)
         if not payload:
-            raise ValueError("Invalid token")
+            raise InvalidTokenError("Invalid token payload")
 
         username = payload.get("sub")
         if not username:
-            raise ValueError("Invalid token payload")
+            raise InvalidTokenError("Invalid token payload")
 
         user_exists = await self.user_repository.exists_with_username(username)
         if not user_exists:
-            raise ValueError("User not found")
+            raise InvalidTokenError("invalid token payload")
 
         return auth_pb2.SuccessResponse(
             success=True,
@@ -338,30 +352,31 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
             timestamp=datetime.now().isoformat(),
         )
 
-    @grpc_error_handler(logger=getLogger("AuthService"))
     async def change_password(self, request, context):
         self.logger.info("Change password request")
 
         payload = self.jwt_service.verify_token(request.token)
         if not payload:
-            raise ValueError("Invalid token")
+            raise InvalidTokenError("Invalid token payload")
 
         username = payload.get("sub")
         if not username:
-            raise ValueError("Invalid token payload")
+            raise InvalidTokenError("Invalid token payload")
 
         user = await self.user_repository.get_by_username(username)
         if not user:
-            raise ValueError("User not found")
+            raise InvalidTokenError("invalid token payload")
 
         hashed_password = HashedPasswordSHA256.from_plain_password(
             request.current_password
         )
         if not user.authenticate(hashed_password):
-            raise ValueError("Current password is incorrect")
+            raise InvalidTokenError("invalid token payload")
 
         if len(request.new_password) < 6:
-            raise ValueError("New password must be at least 6 characters long")
+            raise InvalidArgumentError(
+                "New password must be at least 6 characters long"
+            )
 
         new_password_hash = HashedPasswordSHA256.from_plain_password(
             request.new_password
@@ -379,46 +394,3 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer, ErrorResponseMixin):
             message="Password changed successfully",
             timestamp=datetime.now().isoformat(),
         )
-
-
-async def serve():
-    host = settings.grpc.host
-    port = settings.grpc.port
-
-    server = aio.server()
-
-    from container import container
-
-    container.init_resources()
-    auth_service = container.services.auth_service()
-
-    async def create_tables():
-        """Создание таблиц в базе данных"""
-        try:
-            # Получаем сессию из провайдера
-            async with container.database.database_session() as session:
-                # Создаем таблицы через миграции или прямое создание
-                from database import Base
-
-                async with container.database.database_engine().begin() as conn:
-                    await conn.run_sync(Base.metadata.create_all)
-        except Exception as e:
-            raise
-
-    await create_tables()
-
-    auth_pb2_grpc.add_AuthServiceServicer_to_server(auth_service, server)
-
-    server.add_insecure_port(f"{host}:{port}")
-
-    await server.start()
-
-    try:
-        await server.wait_for_termination()
-    except KeyboardInterrupt:
-        await server.stop(0)
-        container.shutdown_resources()
-
-
-if __name__ == "__main__":
-    asyncio.run(serve())

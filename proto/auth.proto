@@ -54,6 +54,51 @@ message SuccessResponse{
     string timestamp = 3;
 }
 
+message UserId {
+    string id = 1;
+}
+
+message UsernameRequest {
+    string username = 1;
+}
+
+message UserResponse {
+    bool success = 1;
+    string message = 2;
+    string timestamp = 3;
+    User user = 4;
+}
+
+message UsersResponse {
+    bool success = 1;
+    string message = 2;
+    string timestamp = 3;
+    repeated User users = 4;
+}
+
+message ListUsersRequest {
+    int32 limit = 1;
+    int32 offset = 2;
+    optional string username = 3;
+    optional UserRole role = 4;
+    optional bool is_active = 5;
+}
+
+message CreateUserRequest {
+    string username = 1;
+    string password = 2;
+    optional UserRole role = 3;
+    optional bool is_active = 4;
+}
+
+message UpdateUserRequest {
+    string id = 1;
+    optional string username = 2;
+    optional string password = 3;
+    optional UserRole role = 4;
+    optional bool is_active = 5;
+}
+
 message ChangePasswordRequest {
     string current_password = 1; 
     string new_password = 2;
@@ -69,4 +114,13 @@ service AuthService {
     rpc get_user(Token) returns (User); 
     rpc verify(Token) returns (SuccessResponse); 
     rpc change_password(ChangePasswordRequest) returns (SuccessResponse);
+}
+
+service UserService {
+    rpc create_user(CreateUserRequest) returns (UserResponse);
+    rpc get_user(UserId) returns (User);
+    rpc get_user_by_username(UsernameRequest) returns (User);
+    rpc update_user(UpdateUserRequest) returns (UserResponse);
+    rpc delete_user(UserId) returns (SuccessResponse);
+    rpc list_users(ListUsersRequest) returns (UsersResponse);
 }
