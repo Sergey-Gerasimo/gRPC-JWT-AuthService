@@ -53,3 +53,16 @@ async def create_tables(async_engine: AsyncEngine) -> None:
     except Exception as e:
         logger.error(f"Failed to create database tables: {e}")
         raise
+
+
+async def drop_tables(async_engine: AsyncEngine) -> None:
+    logger.info("Starting database tables drop...")
+
+    try:
+        async with async_engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+            logger.info("Database tables dropped successfully")
+
+    except Exception as e:
+        logger.error(f"Failed to drop database tables: {e}")
+        raise
